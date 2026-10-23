@@ -28,3 +28,7 @@ logs/
 
 # Temporary source backups
 *.before-*
+
+# Allow intentional database setup scripts
+!database/schema.sql
+!database/seed.sql

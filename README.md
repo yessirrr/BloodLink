@@ -1,43 +1,94 @@
 # BloodLink
 
-**Blood Donation and Emergency Donor Management System** — a local, full-stack college DBMS project built with React, TypeScript, Express, and MySQL 8.
+**Blood Donation and Emergency Donor Management System**
 
-BloodLink manages donors, recipients, hospitals, blood banks, inventory, requests, donations, and SQL-generated operational reports. It is an academic management prototype, not a clinical decision system. Blood compatibility and donor eligibility must always be verified by qualified professionals.
+BloodLink is a full-stack academic DBMS project for managing blood donors, recipients, hospitals, blood banks, inventory, blood requests, donation records, and operational reports.
 
-## Stack
+> **Project scope:** BloodLink is an academic management prototype, not a clinical decision system. Donor eligibility, blood compatibility, and transfusion decisions must be verified by qualified healthcare professionals.
 
-- React 19, Vite, TypeScript, Tailwind CSS
-- Node.js and Express
-- MySQL 8 with `mysql2`
-- Local REST API; no hosted services or paid APIs
+## Features
+
+- Dashboard with blood inventory and request summaries
+- Donor and recipient record management
+- Hospital and blood bank management
+- Blood inventory tracking by blood group
+- Blood request processing and urgency tracking
+- Donation history management
+- Reports for operational monitoring
+- MySQL relational database with foreign keys, unique constraints, indexes, and validation checks
+- REST API built with Express
+- Responsive React interface
+
+## Technology stack
+
+| Layer | Technology |
+| --- | --- |
+| Frontend | React, TypeScript, Vite |
+| Styling | Tailwind CSS |
+| Backend | Node.js, Express |
+| Database | MySQL 8 |
+| Database driver | mysql2 |
+| Package manager | pnpm |
+
+## Architecture
+
+The application uses a React frontend to communicate with an Express REST API. The API accesses MySQL through a connection pool.
+
+```text
+Browser
+   |
+   v
+React + TypeScript + Vite
+   |
+   | HTTP / REST API
+   v
+Node.js + Express
+   |
+   v
+MySQL 8
+```
+
+Database credentials belong in the server-side `.env` file. They must never be exposed through frontend variables or committed to the repository.
 
 ## Project structure
 
 ```text
-database/
-  schema.sql        # Creates bloodlink_db and all 8 tables
-  seed.sql          # Optional labelled demonstration data
-server/
-  db.js             # MySQL connection pool and transaction helper
-  index.js          # REST API, validation, reports, transactions
-src/
-  App.tsx           # Responsive application and all pages
-  index.css         # Design tokens and responsive styles
-.env.example        # Safe configuration template
+BloodLink/
+├── database/
+│   ├── schema.sql
+│   └── seed.sql
+├── public/
+├── server/
+│   ├── db.js
+│   └── index.js
+├── src/
+│   ├── App.tsx
+│   ├── index.css
+│   ├── main.tsx
+│   └── vite-env.d.ts
+├── .env.example
+├── .gitignore
+├── index.html
+├── package.json
+├── pnpm-lock.yaml
+└── vite.config.ts
 ```
 
-## macOS setup
+## Prerequisites
 
-### 1. Install prerequisites
+- Node.js compatible with the versions required by the project dependencies
+- pnpm
+- MySQL 8
+- macOS, Linux, or another environment capable of running Node.js and MySQL
 
-Install [Homebrew](https://brew.sh/) if it is not already installed, then install Node.js, pnpm, and MySQL 8:
+On macOS with Homebrew:
 
 ```bash
 brew install node pnpm mysql
 brew services start mysql
 ```
 
-Confirm they are available:
+Verify the installations:
 
 ```bash
 node --version
@@ -45,121 +96,174 @@ pnpm --version
 mysql --version
 ```
 
-### 2. Install application dependencies
+## Local installation
 
-From this project directory:
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/yessirrr/BloodLink.git
+cd BloodLink
+```
+
+### 2. Install dependencies
 
 ```bash
 pnpm install
 ```
 
-### 3. Create the local database
+### 3. Create the database
 
-For a default Homebrew installation with no root password:
+For a local MySQL root account without a password:
 
 ```bash
 mysql -u root < database/schema.sql
 ```
 
-If your MySQL root account has a password:
+If the account requires a password:
 
 ```bash
 mysql -u root -p < database/schema.sql
 ```
 
-Optionally load clearly labelled demonstration data:
+The schema creates the `bloodlink_db` database and its application tables.
 
-```bash
-mysql -u root -p < database/seed.sql
-```
+### 4. Configure environment variables
 
-The schema creates the `bloodlink_db` database and exactly eight application tables:
-
-`DONORS`, `RECIPIENTS`, `HOSPITALS`, `BLOOD_BANKS`, `BLOOD_INVENTORY`, `BLOOD_REQUESTS`, `DONATIONS`, and `STAFF_USERS`.
-
-For a least-privilege local account instead of using root:
-
-```sql
-CREATE USER 'bloodlink_user'@'localhost' IDENTIFIED BY 'choose_a_local_password';
-GRANT SELECT, INSERT, UPDATE, DELETE ON bloodlink_db.* TO 'bloodlink_user'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-### 4. Configure local credentials
-
-Copy the example file:
+Create a local environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` and set `DB_USER` and `DB_PASSWORD` to your local MySQL credentials. The frontend receives only `VITE_API_URL`; database credentials remain in the server process and are never bundled into browser code.
+Edit `.env` and enter the credentials for your local MySQL installation.
 
-### 5. Start BloodLink
+The example configuration uses these settings:
 
-Run the frontend and backend together:
+```dotenv
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_mysql_password
+DB_NAME=bloodlink_db
+API_PORT=3001
+FRONTEND_URL=http://localhost:8443
+VITE_API_URL=http://localhost:3001/api
+```
+
+These values are for local development. Adjust them to match your environment. Never commit `.env` or put database credentials in frontend code.
+
+### 5. Start the application
+
+Start both the frontend and API:
 
 ```bash
 pnpm dev:all
 ```
 
-Then open:
+Open the application at:
 
-- Frontend: [http://localhost:5173](http://localhost:5173)
-- API health check: [http://localhost:3001/api/health](http://localhost:3001/api/health)
+- **Frontend:** http://localhost:8443
+- **API health check:** http://localhost:3001/api/health
 
 Alternatively, use two terminals:
 
 ```bash
-# Terminal 1
+# Terminal 1: frontend
 pnpm dev
+```
 
-# Terminal 2
+```bash
+# Terminal 2: backend
 pnpm dev:api
 ```
+
+If a port is already occupied, stop the conflicting process or configure an available port consistently across the frontend, API, and CORS settings.
+
+## Database and demo data
+
+The database includes tables for:
+
+- `DONORS`
+- `RECIPIENTS`
+- `HOSPITALS`
+- `BLOOD_BANKS`
+- `BLOOD_INVENTORY`
+- `BLOOD_REQUESTS`
+- `DONATIONS`
+- `STAFF_USERS`
+
+To load the optional demonstration dataset after creating the schema:
+
+```bash
+mysql -u root -p < database/seed.sql
+```
+
+Use the appropriate MySQL username and authentication options for your local installation.
+
+The seed file contains fictional sample records and a demonstration staff account. Its credentials are for local demonstration only and must not be reused in a real deployment. Do not import the seed into a database containing records you want to preserve.
 
 ## Available scripts
 
 | Command | Purpose |
 | --- | --- |
-| `pnpm dev` | Start the Vite frontend |
-| `pnpm dev:api` | Start the Express API with auto-reload |
-| `pnpm dev:all` | Start frontend and API together |
-| `pnpm start` | Start the API without auto-reload |
-| `pnpm build` | Create a production frontend build |
-| `pnpm format` | Format source files |
+| `pnpm dev` | Start the Vite development server |
+| `pnpm dev:api` | Start the Express API with Nodemon |
+| `pnpm dev:all` | Start the frontend and API together |
+| `pnpm start` | Start the API |
+| `pnpm build` | Build the frontend for production |
+| `pnpm preview` | Preview the production frontend build |
+| `pnpm format` | Run the configured source formatter |
 
 ## Data integrity and security
 
-- All SQL values use `mysql2` parameter placeholders.
-- Donation creation and deletion update donation history and inventory in one transaction.
-- Fulfilling a request atomically checks and subtracts stock; reversing fulfilment restores it.
-- Inventory cannot become negative.
-- A unique constraint prevents duplicate bank/blood-group inventory rows.
-- Foreign keys protect linked records.
-- Staff records store `password_hash`, never a plaintext password.
-- Duplicate and foreign-key errors are returned as useful, non-sensitive API messages.
+The project schema and backend include mechanisms such as:
 
-The optional seed contains fictional demonstration records only. Do not use the seed password or data in a real deployment.
+- Parameterized SQL queries
+- Foreign-key relationships between related records
+- Unique constraints for selected fields
+- Checks for non-negative inventory and positive request quantities
+- Transaction-based handling of selected inventory and donation operations
+- Password-hash storage for staff records
+
+These mechanisms support the academic demonstration; they do not by themselves establish production readiness. Authentication, authorization, deployment security, monitoring, testing, and operational safeguards must be reviewed before real-world use.
+
+## Production build
+
+Build the frontend:
+
+```bash
+pnpm build
+```
+
+The generated frontend files are written to `dist/`.
+
+A successful frontend build does not deploy the Express API or MySQL database. A hosted deployment requires a separately configured API, a reachable database, and the correct production environment variables.
 
 ## Troubleshooting
 
-**`Database operation failed` or API health check fails**
+### Database connection fails
 
-1. Run `brew services list` and ensure MySQL is started.
-2. Verify `.env` credentials with `mysql -u YOUR_USER -p bloodlink_db`.
-3. Confirm the schema was imported.
+1. Check that MySQL is running.
+2. Verify the credentials in `.env`.
+3. Confirm that `bloodlink_db` exists and the schema has been imported.
+4. Check the backend terminal for the underlying error.
 
-**Port already in use**
+### Port already in use
 
-Change `API_PORT` in `.env` and update `VITE_API_URL` to match. Vite can be given another frontend port with `pnpm dev -- --port 5174`; also update `FRONTEND_URL`.
+Check which process is using the port and stop it if appropriate. Ensure the frontend port, API port, `VITE_API_URL`, and `FRONTEND_URL` agree with the local configuration.
 
-**Reset demonstration data**
+### Reset the demonstration database
 
-For a clean academic demo, drop and recreate the database:
+**Warning:** This permanently deletes the existing `bloodlink_db` database and its data.
+
+Only do this if you are certain the database contains no records you need to keep.
 
 ```bash
 mysql -u root -p -e "DROP DATABASE IF EXISTS bloodlink_db;"
 mysql -u root -p < database/schema.sql
 mysql -u root -p < database/seed.sql
 ```
+
+## Disclaimer
+
+BloodLink is intended for educational demonstration and database-management practice. It is not a substitute for professional medical judgment or a validated clinical blood-management system.
